@@ -166,3 +166,33 @@ The output is long. These are the most important lines to look for:
 | `Antennas` | Available antenna ports | `TX/RX, RX2, CAL` |
 
 > **Check the frequency range.** The USRP-2932 normally ships with an SBX daughterboard (400 MHz – 4.4 GHz), but boards can be swapped. Always go by what the probe reports, and choose your antenna and test frequencies based on that range.
+
+### Common messages
+
+**`Malformed GPSDO string`**
+
+```
+[WARNING] [GPS] gps_ctrl_impl::update_cache(): Malformed GPSDO string: Jackson-Labs, FireFly , Firmware Rev 0.929
+```
+
+This is harmless. It comes from the older firmware of the built-in GPSDO, which UHD still detects and uses correctly. Without a GPS antenna connected, the GPSDO simply runs unlocked, which is fine for most experiments.
+
+**Firmware or FPGA version mismatch**
+
+If the probe stops with an error saying the firmware or FPGA image is not compatible, update the images to match your UHD version. First download them:
+
+```
+uhd_images_downloader
+```
+
+Then write them to the device, using your device's address:
+
+```
+uhd_image_loader --args="type=usrp2,addr=192.168.10.11"
+```
+
+> **Warning:** Do not power off or unplug the USRP while the images are being written. When it finishes, power-cycle the USRP and run `uhd_usrp_probe` again.
+
+### Checkpoint
+
+If `uhd_usrp_probe` prints the full device report without errors, your USRP is ready to use.
