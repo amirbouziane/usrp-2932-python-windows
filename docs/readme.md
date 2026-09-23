@@ -83,3 +83,86 @@ Get-NetAdapter
 ```
 
 Find the adapter the USRP is connected to. Its **Status** should be `Up` and its **LinkSpeed** should be `1 Gbps`. Note its **Name** (for example `Ethernet`), since you will need it in the next step.
+
+### Set a fixed IP address on the PC
+
+The USRP does not get an address automatically, so your PC's port needs a fixed address on the same network. This requires an administrator terminal.
+
+1. Press the Windows key, type **PowerShell**, right-click **Windows PowerShell**, and choose **Run as administrator**.
+2. Run the following, replacing `Ethernet` with your adapter's name from the previous step if it's different:
+
+```
+   netsh interface ipv4 set address name="Ethernet" static 192.168.10.1 255.255.255.0
+```
+
+   If it works, it prints nothing.
+3. Back in your normal terminal, confirm the change:
+
+```
+   ipconfig
+```
+
+   Your adapter should now show `IPv4 Address: 192.168.10.1`.
+
+> **To undo this later** (for example, to use the port for a normal network again), run this in an administrator PowerShell:
+>
+> ```
+> netsh interface ipv4 set address name="Ethernet" dhcp
+> ```
+### Find the USRP
+
+The default address of the USRP is `192.168.10.2`, but it may have been changed, especially on a shared lab device. UHD can find it without knowing the address:
+
+```
+uhd_find_devices
+```
+
+The output shows the device's address:
+
+```
+--------------------------------------------------
+-- UHD Device 0
+--------------------------------------------------
+Device Address:
+    serial: F4B623
+    addr: 192.168.10.11
+    name:
+    type: usrp2
+```
+
+Note the `addr` value. You will use it in every command and script from here on.
+
+> **Different network?** If the address does not start with `192.168.10.`, set your PC to an address with the same first three numbers instead. For example, if the USRP is at `192.168.20.5`, use `192.168.20.1` for the PC in the previous step.
+
+> **Nothing found?** Check that the USRP is powered on and the link is `Up`. If Windows shows a firewall prompt, allow access and run the command again.
+
+### Checkpoint
+
+Test the connection with `ping`, using your device's address:
+
+```
+ping 192.168.10.11
+```
+
+If you get four replies with 0% loss, the USRP is connected.
+
+## 3. Check the device
+
+`uhd_usrp_probe` connects to the USRP and prints a full report of its hardware. Replace the address with yours:
+
+```
+uhd_usrp_probe --args="addr=192.168.10.11"
+```
+
+The output is long. These are the most important lines to look for:
+
+| Line in the output | What it tells you | Example |
+|--------------------|-------------------|---------|
+| `Mboard` | Motherboard model | `N210r4` |
+| `FW Version` / `FPGA Version` | Firmware and FPGA versions | `12.4` / `11.1` |
+| `RX Dboard` → `ID` | RF daughterboard model | `WBX v3` |
+| `Freq range` (under RX Frontend) | Frequencies you can receive | `68.750 to 2200.000 MHz` |
+| `Gain range` | Available receive gain | `0.0 to 31.5 step 0.5 dB` |
+| `Antennas` | Available antenna ports | `TX/RX, RX2, CAL` |
+
+> **Check the frequency range.** The USRP-2932 normally ships with an SBX daughterboard (400 MHz – 4.4 GHz), but boards can be swapped. Always go by what the probe reports, and choose your antenna and test frequencies based on that range.
