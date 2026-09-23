@@ -196,3 +196,40 @@ uhd_image_loader --args="type=usrp2,addr=192.168.10.11"
 ### Checkpoint
 
 If `uhd_usrp_probe` prints the full device report without errors, your USRP is ready to use.
+
+## 4. Set up VS Code
+
+VS Code needs to use the same Python version that UHD works with. If you have several Python versions installed, this step makes sure scripts run with the right one.
+
+### Install the Python extension
+
+1. Open the **Extensions** panel (**Ctrl+Shift+X**).
+2. Search for **Python** and install the one published by **Microsoft**.
+
+### Select the Python interpreter
+
+1. Press **Ctrl+Shift+P**, type **Python: Select Interpreter**, and press Enter.
+2. Choose the Python version where `import uhd` worked in Section 1 (for example **Python 3.10.11**).
+3. Check the bottom-right corner of VS Code. It should now show that version.
+
+### Checkpoint
+
+Create a file named `check_setup.py` with this content:
+
+```python
+import uhd
+import numpy
+import matplotlib
+
+print("UHD:", uhd.get_version_string())
+print("NumPy:", numpy.__version__)
+print("Matplotlib:", matplotlib.__version__)
+```
+
+Run it with the **▶ Run Python File** button in the top-right corner of the editor. If all three versions print without errors, VS Code is set up correctly.
+
+## Safety
+
+- Never transmit without an antenna or a 50 Ω load connected to the TX/RX port.
+- Keep the signal at the RX input below about 0 dBm to avoid damaging the receiver.
+- Only transmit on frequencies you are licensed to use.
